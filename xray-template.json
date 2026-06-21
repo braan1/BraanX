@@ -1,0 +1,304 @@
+{
+  "_comment": "BraanX XRay Configuration Template - Replace PLACEHOLDER values with actual data",
+  "_xray_uuid": "PLACEHOLDER_MAIN_UUID",
+  "_xray_x25519_public": "PLACEHOLDER_X25519_PUB",
+  "_xray_x25519_private": "PLACEHOLDER_X25519_PRIV",
+
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/xray/access.log",
+    "error": "/var/log/xray/error.log"
+  },
+
+  "api": {
+    "services": ["HandlerService", "StatsService"],
+    "tag": "api"
+  },
+
+  "stats": {},
+
+  "policy": {
+    "levels": {
+      "0": {
+        "handshake": 4,
+        "connIdle": 300,
+        "uplinkOnly": 2,
+        "downlinkOnly": 5
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
+
+  "inbounds": [
+    {
+      "_comment": "VLESS WebSocket (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2001,
+      "tag": "vless-ws",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/vless-ws"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VLESS gRPC (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2002,
+      "tag": "vless-grpc",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {"serviceName": "vless-grpc", "multiMode": true},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VLESS HTTPUpgrade (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2003,
+      "tag": "vless-hupg",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "httpUpgradeSettings": {"path": "/vless-hupg"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VMess WebSocket (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2004,
+      "tag": "vmess-ws",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx", "alterId": 0}
+        ],
+        "decryption": "auto",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/vmess-ws"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VMess gRPC (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2005,
+      "tag": "vmess-grpc",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx", "alterId": 0}
+        ],
+        "decryption": "auto",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {"serviceName": "vmess-grpc", "multiMode": true},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VMess HTTPUpgrade (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2006,
+      "tag": "vmess-hupg",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx", "alterId": 0}
+        ],
+        "decryption": "auto",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "httpUpgradeSettings": {"path": "/vmess-hupg"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "Trojan WebSocket (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2007,
+      "tag": "trojan-ws",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {"password": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/trojan-ws"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "Trojan gRPC (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2008,
+      "tag": "trojan-grpc",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {"password": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "grpc",
+        "grpcSettings": {"serviceName": "trojan-grpc", "multiMode": true},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "Trojan HTTPUpgrade (TLS via nginx port 443)",
+      "listen": "127.0.0.1",
+      "port": 2009,
+      "tag": "trojan-hupg",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {"password": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "httpUpgradeSettings": {"path": "/trojan-hupg"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VLESS Reality (direct, port 8443, no TLS cert needed)",
+      "listen": "0.0.0.0",
+      "port": 8443,
+      "tag": "vless-reality",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx", "flow": "xtls-rprx-vision"}
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "showDests": false,
+          "dest": "1.1.1.1:443",
+          "serverNames": ["www.microsoft.com", "www.yahoo.com"],
+          "privateKey": "PLACEHOLDER_X25519_PRIV",
+          "shortIds": ["", "abcd1234", "0123456789ab"]
+        }
+      }
+    },
+    {
+      "_comment": "VLESS Non-TLS (via nginx port 80)",
+      "listen": "127.0.0.1",
+      "port": 2011,
+      "tag": "vless-ntls",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx"}
+        ],
+        "decryption": "none",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/vless-ntls"},
+        "security": "none"
+      }
+    },
+    {
+      "_comment": "VMess Non-TLS (via nginx port 80)",
+      "listen": "127.0.0.1",
+      "port": 2012,
+      "tag": "vmess-ntls",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {"id": "PLACEHOLDER_MAIN_UUID", "email": "main@braanx", "alterId": 0}
+        ],
+        "decryption": "auto",
+        "fallbacks": [{"dest": 1010}]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/vmess-ntls"},
+        "security": "none"
+      }
+    }
+  ],
+
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    }
+  ],
+
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": ["vless-reality"],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["geosite:category-ads-all"],
+        "outboundTag": "block"
+      }
+    ]
+  }
+}

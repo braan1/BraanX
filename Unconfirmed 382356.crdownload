@@ -1,0 +1,130 @@
+# ============================================================================
+# BraanX - HAProxy Configuration Template
+# ============================================================================
+# Load balancing for WebSocket proxy connections.
+# Replace BACKEND_SERVER with actual backend addresses.
+# ============================================================================
+
+global
+    maxconn 4096
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
+    timeout tunnel  3600s
+    retries 3
+    option redispatch
+    maxconn 2000
+
+# --------------------------------------------------------------------------
+# Stats Dashboard
+# --------------------------------------------------------------------------
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 10s
+    stats admin if LOCALHOST
+    stats auth admin:BRAANX_ADMIN_PASSWORD
+
+# --------------------------------------------------------------------------
+# Frontend: WebSocket TLS (Port 443)
+# --------------------------------------------------------------------------
+frontend ws_tls_front
+    bind *:443 ssl crt /etc/braanx/ssl/ alpn h2,http/1.1
+    mode http
+
+    # TCP timeout for WebSocket
+    timeout client 1h
+
+    # VLESS WebSocket
+    acl is_vless_ws path /vless-ws
+    use_backend vless_ws_back if is_vless_ws
+
+    # VMess WebSocket
+    acl is_vmess_ws path /vmess-ws
+    use_backend vmess_ws_back if is_vmess_ws
+
+    # Trojan WebSocket
+    acl is_trojan_ws path /trojan-ws
+    use_backend trojan_ws_back if is_trojan_ws
+
+    # SSH-over-WebSocket
+    acl is_ssh_ws path /ssh-ws
+    use_backend ssh_ws_back if is_ssh_ws
+
+    # Default backend (fake page)
+    default_backend default_back
+
+# --------------------------------------------------------------------------
+# Frontend: WebSocket Non-TLS (Port 80)
+# --------------------------------------------------------------------------
+frontend ws_ntls_front
+    bind *:80
+    mode http
+    timeout client 1h
+
+    # VLESS Non-TLS
+    acl is_vless_ntls path /vless-ntls
+    use_backend vless_ntls_back if is_vless_ntls
+
+    # VMess Non-TLS
+    acl is_vmess_ntls path /vmess-ntls
+    use_backend vmess_ntls_back if is_vmess_ntls
+
+    default_backend default_back
+
+# --------------------------------------------------------------------------
+# Backends: XRay internal ports
+# --------------------------------------------------------------------------
+backend vless_ws_back
+    option httpchk GET /
+    server xray1 127.0.0.1:2001 maxconn 500 check
+    timeout server 1h
+    timeout connect 5s
+
+backend vmess_ws_back
+    option httpchk GET /
+    server xray1 127.0.0.1:2004 maxconn 500 check
+    timeout server 1h
+    timeout connect 5s
+
+backend trojan_ws_back
+    option httpchk GET /
+    server xray1 127.0.0.1:2007 maxconn 500 check
+    timeout server 1h
+    timeout connect 5s
+
+backend ssh_ws_back
+    server ws_ssh 127.0.0.1:2222 maxconn 200
+    timeout server 2h
+    timeout connect 5s
+
+backend vless_ntls_back
+    server xray1 127.0.0.1:2011 maxconn 500
+    timeout server 1h
+    timeout connect 5s
+
+backend vmess_ntls_back
+    server xray1 127.0.0.1:2012 maxconn 500
+    timeout server 1h
+    timeout connect 5s
+
+# --------------------------------------------------------------------------
+# Default Backend (fake web page)
+# --------------------------------------------------------------------------
+backend default_back
+    server nginx 127.0.0.1:1010 maxconn 100

@@ -1,0 +1,16 @@
+[Unit]
+Description=BraanX Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/etc/braanx/bot
+ExecStart=/usr/bin/python3 /etc/braanx/bot/braanx_bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
